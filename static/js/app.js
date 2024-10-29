@@ -3,20 +3,28 @@ function buildMetadata(sample) {
   d3.json("https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json").then((data) => {
 
     // get the metadata field
-    let metadata = d3.select("#metadata");
+    let metadata = data.metadata;
+    console.log(metadata);
 
     // Filter the metadata for the object with the desired sample number
-    number = metadata.filter(optionChanged);
+    let result = metadata.filter((dict) => dict.id === sample);
+    console.log(result);
 
     // Use d3 to select the panel with id of `#sample-metadata`
-    d3.select("#sample-metadata");
+    let panel = d3.select("#sample-metadata");
 
     // Use `.html("") to clear any existing metadata
-    console.log(data);
+    //panel.html("";)
 
     // Inside a loop, you will need to use d3 to append new
     // tags for each key-value in the filtered metadata.
-
+    panel.html(`ID: ${result.id} <hr>
+      ETHNICITY: ${result.ethnicity} <hr>
+      GENDER: ${result.gender} <hr>
+      AGE: ${result.age} <hr>
+      LOCATION: ${result.location} <hr>
+      BBTYPE: ${result.bbtype} <hr>
+      WFREQ: ${result.wfreq}`);
   });
 }
 
@@ -25,21 +33,22 @@ function buildCharts(sample) {
   d3.json("https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json").then((data) => {
 
     // Get the samples field
-    let samples = d3.select("#samples");
+    let samples = data.samples;
+    console.log(samples);
 
     // Filter the samples for the object with the desired sample number
-    let object = samples.filter(sample);
+    let result = samples.filter((dict) => dict.id === sample);
 
     // Get the otu_ids, otu_labels, and sample_values
-    let otuIDs = object.otu_ids;
-    let otuLabels = object.otu_labels;
-    let sampleValues = object.sample_values;
+    let otuIDs = result.otu_ids;
+    let otuLabels = result.otu_labels;
+    let sampleValues = result.sample_values;
 
     // Build a Bubble Chart
     let bubbleTrace = {
       x: [otuIDs],
       y: [sampleValues]
-    }
+    };
 
     // Render the Bubble Chart
 
@@ -52,7 +61,15 @@ function buildCharts(sample) {
 
 
     // Render the Bar Chart
-
+    let barTrace = [
+      {
+        x: [sampleValues],
+        y: [otuIDs],
+        type: 'bar'
+      }
+    ];
+    
+    Plotly.newPlot('myDiv', barTrace);
   });
 }
 
@@ -66,6 +83,9 @@ function init() {
 
     // Use d3 to select the dropdown with id of `#selDataset`
     let dropdownMenu = d3.select("#selDataset");
+    for (let i = 0; i < names.length; i++) {
+      dropdownMenu.append("option").attr("value", names[i]).text(names[i])
+    };
 
     // Use the list of sample names to populate the select options
     // Hint: Inside a loop, you will need to use d3 to append a new
@@ -73,20 +93,34 @@ function init() {
 
 
     // Get the first sample from the list
-
+    let firstSample = dropdownMenu[0];
+    console.log(firstSample);
 
     // Build charts and metadata panel with the first sample
-
+    buildMetadata(firstSample);
+    buildCharts(firstSample);
   });
 }
 
 // Function for event listener
 function optionChanged(newSample) {
   // Build charts and metadata panel each time a new sample is selected
-  console.log(newSample);
+  //console.log(newSample);
   buildMetadata(newSample);
   buildCharts(newSample);
 }
 
 // Initialize the dashboard
 init();
+
+
+
+/*d3.select("body")
+  .append("svg")
+    .attr("width", 960)
+    .attr("height", 500)
+  .append("g")
+    .attr("transform", "translate(20,20)")
+  .append("rect")
+    .attr("width", 920)
+    .attr("height", 460);*/
